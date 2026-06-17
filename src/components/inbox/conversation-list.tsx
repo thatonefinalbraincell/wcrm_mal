@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 import type { Conversation, ConversationStatus, Profile } from "@/types";
 import { Search, ChevronDown } from "lucide-react";
@@ -50,6 +51,7 @@ export function ConversationList({
   onConversationsLoaded,
   resyncToken = 0,
 }: ConversationListProps) {
+  const { user, profileLoading, isAgent } = useAuth();
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<ConversationStatus | "all">("all");
   const [loading, setLoading] = useState(true);
@@ -89,14 +91,22 @@ export function ConversationList({
   });
 
   useEffect(() => {
+    if (profileLoading) return;
+
     const supabase = createClient();
     let cancelled = false;
 
     (async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("conversations")
         .select("*, contact:contacts(*)")
         .order("last_message_at", { ascending: false });
+
+      if (isAgent && user?.id) {
+        query = query.eq("assigned_agent_id", user.id);
+      }
+
+      const { data, error } = await query;
 
       if (cancelled) return;
 
@@ -122,7 +132,7 @@ export function ConversationList({
     // `resyncToken` is included so the parent can force a refetch when
     // the realtime channel reconnects or the tab regains focus — catches
     // up on any events sent while the WS was disconnected or throttled.
-  }, [resyncToken]);
+  }, [resyncToken, profileLoading, user?.id, isAgent]);
 
   const filtered = useMemo(() => {
     let result = conversations;
