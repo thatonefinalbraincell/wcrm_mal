@@ -54,11 +54,14 @@ export default function SettingsPage() {
   // into `useState` + a sync effect, which tripped React 19's
   // set-state-in-effect rule and was also redundant.
   const queryTab = searchParams.get('tab');
-  // Deep-linking to the admin-only tab as a non-admin falls back to profile
-  // rather than landing on a tab with no trigger or content.
+  // Deep-linking to the admin-only tabs as a non-admin falls back to
+  // profile rather than landing on a tab with no trigger or content.
   const resolved: TabValue = isTabValue(queryTab) ? queryTab : 'profile';
   const tab: TabValue =
-    resolved === 'custom-fields' && !canEditSettings ? 'profile' : resolved;
+    (resolved === 'whatsapp' && !canEditSettings) ||
+    (resolved === 'custom-fields' && !canEditSettings)
+      ? 'profile'
+      : resolved;
 
   const onChange = (next: TabValue) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -85,13 +88,15 @@ export default function SettingsPage() {
             <User className="size-4" />
             Profile
           </TabsTrigger>
-          <TabsTrigger
-            value="whatsapp"
-            className="data-active:text-primary text-slate-400 data-active:bg-slate-800"
-          >
-            <Settings className="size-4" />
-            WhatsApp Config
-          </TabsTrigger>
+          {canEditSettings && (
+            <TabsTrigger
+              value="whatsapp"
+              className="data-active:text-primary text-slate-400 data-active:bg-slate-800"
+            >
+              <Settings className="size-4" />
+              WhatsApp Config
+            </TabsTrigger>
+          )}
           <TabsTrigger
             value="templates"
             className="data-active:text-primary text-slate-400 data-active:bg-slate-800"

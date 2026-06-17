@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { useAuth } from "@/hooks/use-auth";
 import type { Conversation, Message, Contact, ConversationStatus } from "@/types";
 import { useRealtime } from "@/hooks/use-realtime";
 import { ConversationList } from "@/components/inbox/conversation-list";
@@ -38,6 +39,7 @@ export default function InboxPage() {
    * once on conversationId-change as usual.
    */
   const [resyncToken, setResyncToken] = useState(0);
+  const { user, profileLoading, isAgent } = useAuth();
 
   // Fire the deep-link auto-select exactly once per URL — subsequent
   // list refreshes (realtime, manual refetch) must not snap the user
@@ -82,11 +84,16 @@ export default function InboxPage() {
     hydratingConvIdsRef.current.add(convId);
     try {
       const supabase = createClient();
-      const { data, error } = await supabase
+      let query = supabase
         .from("conversations")
         .select("*, contact:contacts(*)")
-        .eq("id", convId)
-        .maybeSingle();
+        .eq("id", convId);
+
+      if (isAgent && user?.id) {
+        query = query.eq("assigned_agent_id", user.id);
+      }
+
+      const { data, error } = await query.maybeSingle();
       if (error) {
         // Supabase errors have non-enumerable properties — log fields
         // explicitly so the console message isn't just `{}`.
@@ -234,6 +241,9 @@ export default function InboxPage() {
       const conv = event.new;
 
       if (event.eventType === "INSERT") {
+        if (isAgent && user?.id && conv.assigned_agent_id !== user.id) {
+          return;
+        }
         // Prepend immediately for snappy UX so the new conv shows in the
         // list right away, then hydrate to fill in the `contact` join
         // (realtime payloads never include joins). Skip both if we
@@ -249,6 +259,16 @@ export default function InboxPage() {
       }
 
       if (event.eventType === "UPDATE") {
+        if (isAgent && user?.id && conv.assigned_agent_id !== user.id) {
+          setConversations((prev) => prev.filter((c) => c.id !== conv.id));
+          if (activeConversation?.id === conv.id) {
+            setActiveConversation(null);
+            setActiveContact(null);
+            setMessages([]);
+          }
+          return;
+        }
+
         if (knownConvIdsRef.current.has(conv.id)) {
           // If this UPDATE is for the conv the user is currently viewing,
           // suppress the incoming unread_count — the user is reading it

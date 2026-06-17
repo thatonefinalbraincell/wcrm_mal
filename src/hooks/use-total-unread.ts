@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { useAuth } from "@/hooks/use-auth";
 import type { Conversation } from "@/types";
 
 /**
@@ -13,6 +14,7 @@ import type { Conversation } from "@/types";
  * "inbox-realtime") so both can coexist without sharing state.
  */
 export function useTotalUnread(): number {
+  const { user, profileLoading, isAgent } = useAuth();
   const [total, setTotal] = useState(0);
 
   // Keep a live local mirror of {id: unread_count} so INSERT/UPDATE/DELETE
@@ -20,15 +22,23 @@ export function useTotalUnread(): number {
   const countsRef = useRef<Map<string, number>>(new Map());
 
   useEffect(() => {
+    if (profileLoading) return;
     const supabase = createClient();
     let cancelled = false;
 
     // Initial load. RLS scopes this to the signed-in user automatically —
-    // no explicit user_id filter needed here.
+    // no explicit user_id filter needed here. Agents should only count
+    // conversations assigned to them.
     (async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("conversations")
         .select("id, unread_count");
+
+      if (isAgent && user?.id) {
+        query = query.eq("assigned_agent_id", user.id);
+      }
+
+      const { data, error } = await query;
       if (cancelled || error || !data) return;
 
       const map = new Map<string, number>();
@@ -51,10 +61,26 @@ export function useTotalUnread(): number {
           const map = countsRef.current;
           if (payload.eventType === "DELETE") {
             const oldRow = payload.old as Partial<Conversation>;
-            if (oldRow.id) map.delete(oldRow.id);
+            if (isAgent && user?.id) {
+              if (oldRow.assigned_agent_id === user.id && oldRow.id) {
+                map.delete(oldRow.id);
+              }
+            } else if (oldRow.id) {
+              map.delete(oldRow.id);
+            }
           } else {
             const row = payload.new as Conversation;
-            map.set(row.id, row.unread_count ?? 0);
+            if (isAgent && user?.id) {
+              const wasAssigned = (payload.old as Partial<Conversation>)?.assigned_agent_id === user.id;
+              const isAssigned = row.assigned_agent_id === user.id;
+              if (isAssigned) {
+                map.set(row.id, row.unread_count ?? 0);
+              } else if (wasAssigned) {
+                map.delete(row.id);
+              }
+            } else {
+              map.set(row.id, row.unread_count ?? 0);
+            }
           }
           // Recompute — cheap, conversations per user stay small.
           let sum = 0;

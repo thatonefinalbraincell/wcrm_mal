@@ -117,7 +117,7 @@ export function Header({ onOpenSidebar }: HeaderProps) {
           <DropdownMenuItem
             render={
               <Link
-                href="/settings?tab=whatsapp"
+                href="/settings?tab=profile"
                 className="text-slate-200 focus:bg-slate-800 focus:text-white"
               />
             }
