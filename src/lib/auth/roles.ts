@@ -68,7 +68,7 @@ export function isAccountRole(value: unknown): value is AccountRole {
 
 /** Owner / admin: invite, remove, change roles. */
 export function canManageMembers(role: AccountRole): boolean {
-  return hasMinRole(role, "admin");
+  return role === "owner";
 }
 
 /**

@@ -78,7 +78,12 @@ export function FlowEditorShell({ initialFlow, initialNodes }: Props) {
 
   return (
     <FlowEditorProvider initialFlow={initialFlow} initialNodes={initialNodes}>
-      <div className="mx-auto flex h-full max-w-4xl flex-col gap-6 p-6">
+      <div
+        className={cn(
+          "mx-auto flex h-full flex-col gap-6 p-6 transition-all duration-300",
+          effectiveView === "canvas" ? "w-full max-w-none px-4" : "max-w-4xl"
+        )}
+      >
         <EditorHeader />
         {!isMobile && (
           <div className="flex items-center justify-end">
@@ -105,12 +110,11 @@ export function FlowEditorShell({ initialFlow, initialNodes }: Props) {
 
         {effectiveView === "canvas" ? <FlowCanvas /> : <FlowBuilder />}
 
-        {/* Sticky-bottom validation panel mirrors the placement used
-            when this lived inside FlowBuilder — the activate-readiness
-            status follows the user as they scroll, in either view. */}
-        <div className="sticky bottom-4 z-10 shadow-xl shadow-slate-950/60">
-          <ValidationPanel />
-        </div>
+        {effectiveView === "list" && (
+          <div className="sticky bottom-4 z-10 shadow-xl shadow-slate-950/60">
+            <ValidationPanel />
+          </div>
+        )}
       </div>
     </FlowEditorProvider>
   );

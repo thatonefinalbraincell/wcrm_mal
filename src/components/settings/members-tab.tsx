@@ -81,9 +81,7 @@ interface Invitation {
 // Editable roles in the inline dropdown. Owner is never an option —
 // promotions go through the (deferred) Transfer Ownership flow.
 const EDITABLE_ROLES: { value: AccountRole; label: string; hint: string }[] = [
-  { value: 'admin', label: 'Admin', hint: 'Manage members + everything' },
   { value: 'agent', label: 'Agent', hint: 'Use features; no settings' },
-  { value: 'viewer', label: 'Viewer', hint: 'Read-only across the app' },
 ];
 
 // Per-role chip metadata. The colour scale runs amber (owner —
@@ -382,39 +380,12 @@ export function MembersTab() {
                     {/* Role display / editor. Inline Select is admin+
                         only AND not allowed on the owner row (owner
                         changes go through transfer, which lands later). */}
-                    {canManageMembers && !isOwnerRow && !isSelf ? (
-                      <Select
-                        value={member.role}
-                        onValueChange={(v) =>
-                          // Base UI Select can emit null on clear. We
-                          // don't expose a clear affordance, so the
-                          // guard is defensive — but the typed
-                          // signature requires it.
-                          v && handleRoleChange(member, v as AccountRole)
-                        }
-                      >
-                        <SelectTrigger
-                          className="w-32 bg-slate-800 border-slate-700 text-slate-200"
-                          disabled={isBusy}
-                        >
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {EDITABLE_ROLES.map((r) => (
-                            <SelectItem key={r.value} value={r.value}>
-                              {r.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      <span
-                        className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium ${roleMeta.className}`}
-                      >
-                        <RoleIcon className="size-3.5" />
-                        {roleMeta.label}
-                      </span>
-                    )}
+                    <span
+                      className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium ${roleMeta.className}`}
+                    >
+                      <RoleIcon className="size-3.5" />
+                      {roleMeta.label}
+                    </span>
 
                     {/* Remove. Admin+ only; never on the owner row;
                         never on yourself. Pre-polish styling was

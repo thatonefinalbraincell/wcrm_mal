@@ -9,6 +9,7 @@ import { formatDistanceToNow } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/use-auth";
 
 // Icon per notification type. Only one type exists today
 // (conversation_assigned) but this keeps future types a one-line add.
@@ -18,9 +19,13 @@ const TYPE_ICON: Record<Notification["type"], typeof Bell> = {
 
 export default function NotificationsPage() {
   const router = useRouter();
+  const { isOwner, isAdmin } = useAuth();
+  const isSuperOrAdmin = isOwner || isAdmin;
+
   const [notifications, setNotifications] = useState<Notification[] | null>(
     null,
   );
+  const [profiles, setProfiles] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const [markingAll, setMarkingAll] = useState(false);
 
@@ -35,8 +40,22 @@ export default function NotificationsPage() {
       setError(fetchErr.message);
       return;
     }
-    setNotifications((data ?? []) as Notification[]);
-  }, []);
+    const notifs = (data ?? []) as Notification[];
+    setNotifications(notifs);
+
+    if (isSuperOrAdmin) {
+      const { data: profs } = await supabase
+        .from("profiles")
+        .select("user_id, full_name");
+      if (profs) {
+        const map: Record<string, string> = {};
+        profs.forEach((p) => {
+          map[p.user_id] = p.full_name ?? "";
+        });
+        setProfiles(map);
+      }
+    }
+  }, [isSuperOrAdmin]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -192,6 +211,8 @@ export default function NotificationsPage() {
           {notifications.map((n) => {
             const Icon = TYPE_ICON[n.type] ?? Bell;
             const isUnread = !n.read_at;
+            const recipientName = profiles[n.user_id];
+
             return (
               <li key={n.id}>
                 <button
@@ -228,6 +249,11 @@ export default function NotificationsPage() {
                       >
                         {n.title}
                       </span>
+                      {isSuperOrAdmin && recipientName && (
+                        <span className="text-[10px] text-slate-400 bg-slate-800 px-1.5 py-0.5 rounded-md border border-slate-700">
+                          For: {recipientName}
+                        </span>
+                      )}
                       {isUnread && (
                         <span
                           aria-label="Unread"

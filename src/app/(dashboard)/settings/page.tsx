@@ -48,6 +48,7 @@ export default function SettingsPage() {
   // admin+ only — mirror the gate on the Contacts page. The `custom_fields`
   // RLS rejects non-admin writes regardless.
   const canEditSettings = useCan('edit-settings');
+  const canManageMembers = useCan('manage-members');
 
   // The URL is the single source of truth for the active tab — no
   // local state, no sync effect. A previous revision duplicated this
@@ -59,7 +60,8 @@ export default function SettingsPage() {
   const resolved: TabValue = isTabValue(queryTab) ? queryTab : 'profile';
   const tab: TabValue =
     (resolved === 'whatsapp' && !canEditSettings) ||
-    (resolved === 'custom-fields' && !canEditSettings)
+    (resolved === 'custom-fields' && !canEditSettings) ||
+    (resolved === 'members' && !canManageMembers)
       ? 'profile'
       : resolved;
 
@@ -134,13 +136,15 @@ export default function SettingsPage() {
             <Palette className="size-4" />
             Appearance
           </TabsTrigger>
-          <TabsTrigger
-            value="members"
-            className="data-active:text-primary text-slate-400 data-active:bg-slate-800"
-          >
-            <UsersRound className="size-4" />
-            Members
-          </TabsTrigger>
+          {canManageMembers && (
+            <TabsTrigger
+              value="members"
+              className="data-active:text-primary text-slate-400 data-active:bg-slate-800"
+            >
+              <UsersRound className="size-4" />
+              Members
+            </TabsTrigger>
+          )}
         </TabsList>
 
         <TabsContent value="profile" className="space-y-6">
@@ -175,9 +179,11 @@ export default function SettingsPage() {
           <AppearancePanel />
         </TabsContent>
 
-        <TabsContent value="members">
-          <MembersTab />
-        </TabsContent>
+        {canManageMembers && (
+          <TabsContent value="members">
+            <MembersTab />
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );

@@ -47,7 +47,7 @@ export async function PATCH(
   { params }: { params: Promise<{ userId: string }> },
 ) {
   try {
-    const ctx = await requireRole("admin");
+    const ctx = await requireRole("owner");
 
     const limit = checkRateLimit(
       `admin:memberRole:${ctx.userId}`,
@@ -62,9 +62,9 @@ export async function PATCH(
       | null;
     const role = body?.role;
 
-    if (!isAccountRole(role)) {
+    if (!isAccountRole(role) || role === "viewer") {
       return NextResponse.json(
-        { error: "'role' must be one of owner, admin, agent, viewer" },
+        { error: "'role' must be admin or agent" },
         { status: 400 },
       );
     }
@@ -99,7 +99,7 @@ export async function DELETE(
   { params }: { params: Promise<{ userId: string }> },
 ) {
   try {
-    const ctx = await requireRole("admin");
+    const ctx = await requireRole("owner");
 
     const limit = checkRateLimit(
       `admin:memberRemove:${ctx.userId}`,

@@ -144,7 +144,7 @@ export function MessageThread({
   resyncToken = 0,
   onRefresh,
 }: MessageThreadProps) {
-  const { user } = useAuth();
+  const { user, isAgent } = useAuth();
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [templateModalOpen, setTemplateModalOpen] = useState(false);
@@ -813,59 +813,61 @@ export function MessageThread({
           </DropdownMenu>
 
           {/* Assign dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              className={cn(
-                "inline-flex items-center justify-center h-7 gap-1 px-2 text-xs rounded-md hover:bg-slate-800",
-                assignedAgentId ? "text-primary" : "text-slate-400"
-              )}
-            >
-              <UserPlus className="h-3 w-3" />
-              <span className="hidden sm:inline">{assignLabel}</span>
-              <ChevronDown className="h-3 w-3" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              className="border-slate-700 bg-slate-800"
-            >
-              {profiles.length === 0 ? (
-                <DropdownMenuItem disabled className="text-sm text-slate-500">
-                  No teammates available
-                </DropdownMenuItem>
-              ) : (
-                profiles.map((p) => {
-                  const isSelected = p.user_id === assignedAgentId;
-                  return (
-                    <DropdownMenuItem
-                      key={p.id}
-                      onClick={() => handleAssignChange(p.user_id)}
-                      className={cn(
-                        "text-sm",
-                        isSelected ? "text-primary" : "text-slate-300"
-                      )}
-                    >
-                      <span className="flex-1">
-                        {p.full_name}
-                        {p.user_id === user?.id ? " (me)" : ""}
-                      </span>
-                      {isSelected && <Check className="ml-2 h-3 w-3" />}
-                    </DropdownMenuItem>
-                  );
-                })
-              )}
-              {assignedAgentId && (
-                <>
-                  <DropdownMenuSeparator className="bg-slate-700" />
-                  <DropdownMenuItem
-                    onClick={() => handleAssignChange(null)}
-                    className="text-sm text-slate-400"
-                  >
-                    Unassign
+          {!isAgent && (
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                className={cn(
+                  "inline-flex items-center justify-center h-7 gap-1 px-2 text-xs rounded-md hover:bg-slate-800",
+                  assignedAgentId ? "text-primary" : "text-slate-400"
+                )}
+              >
+                <UserPlus className="h-3 w-3" />
+                <span className="hidden sm:inline">{assignLabel}</span>
+                <ChevronDown className="h-3 w-3" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                className="border-slate-700 bg-slate-800"
+              >
+                {profiles.length === 0 ? (
+                  <DropdownMenuItem disabled className="text-sm text-slate-500">
+                    No teammates available
                   </DropdownMenuItem>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+                ) : (
+                  profiles.map((p) => {
+                    const isSelected = p.user_id === assignedAgentId;
+                    return (
+                      <DropdownMenuItem
+                        key={p.id}
+                        onClick={() => handleAssignChange(p.user_id)}
+                        className={cn(
+                          "text-sm",
+                          isSelected ? "text-primary" : "text-slate-300"
+                        )}
+                      >
+                        <span className="flex-1">
+                          {p.full_name}
+                          {p.user_id === user?.id ? " (me)" : ""}
+                        </span>
+                        {isSelected && <Check className="ml-2 h-3 w-3" />}
+                      </DropdownMenuItem>
+                    );
+                  })
+                )}
+                {assignedAgentId && (
+                  <>
+                    <DropdownMenuSeparator className="bg-slate-700" />
+                    <DropdownMenuItem
+                      onClick={() => handleAssignChange(null)}
+                      className="text-sm text-slate-400"
+                    >
+                      Unassign
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
       </div>
 

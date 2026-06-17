@@ -38,7 +38,7 @@ import {
 } from '@/components/ui/select';
 import { useAuth } from '@/hooks/use-auth';
 
-type InviteRole = 'admin' | 'agent' | 'viewer';
+type InviteRole = 'admin' | 'agent';
 
 interface InviteMemberDialogProps {
   open: boolean;
@@ -59,7 +59,6 @@ const ROLE_DESCRIPTIONS: Record<InviteRole, string> = {
     'Can invite teammates, manage settings, send messages, and edit data.',
   agent:
     'Can use the inbox, contacts, broadcasts, automations, and flows. No settings or member access.',
-  viewer: 'Read-only access across every page. Cannot send or edit anything.',
 };
 
 // Server caps label at 80 chars (see src/app/api/account/invitations/route.ts).
@@ -280,21 +279,11 @@ export function InviteMemberDialog({
             <div className="space-y-4 py-2">
               <div className="space-y-2">
                 <Label className="text-slate-300">Role</Label>
-                <Select
-                  value={role}
-                  onValueChange={(v) => v && setRole(v as InviteRole)}
-                >
-                  <SelectTrigger className="w-full bg-slate-800 border-slate-700 text-white">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="admin">Admin</SelectItem>
-                    <SelectItem value="agent">Agent</SelectItem>
-                    <SelectItem value="viewer">Viewer</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="w-full bg-slate-800 border border-slate-700 text-white rounded-md px-3 py-2 text-sm font-medium">
+                  Agent
+                </div>
                 <p className="text-xs text-slate-500">
-                  {ROLE_DESCRIPTIONS[role]}
+                  {ROLE_DESCRIPTIONS['agent']}
                 </p>
               </div>
 

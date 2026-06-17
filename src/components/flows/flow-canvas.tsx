@@ -88,6 +88,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useFlowEditor } from "./flow-editor-state";
 import { NodeConfigForm } from "./forms/node-config-form";
+import { ValidationPanel } from "./validation-panel";
 
 // React-Flow node `data` payload — the bits our custom renderer needs.
 interface NodeData extends Record<string, unknown> {
@@ -456,57 +457,80 @@ function FlowCanvasInner() {
 
   if (rfNodes.length === 0) {
     return (
-      <div className="flex h-[60vh] flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-slate-700 bg-slate-950 text-sm text-slate-500">
-        <p>No nodes yet.</p>
-        <CanvasAddNodeButton />
+      <div className="flex w-full gap-6 h-[calc(100vh-220px)] min-h-[500px]">
+        <div className="flex-1 flex h-full flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-slate-700 bg-slate-950 text-sm text-slate-500">
+          <p>No nodes yet.</p>
+          <CanvasAddNodeButton />
+        </div>
+        <div className="w-80 h-full flex flex-col shrink-0 overflow-y-auto border border-slate-800 bg-slate-900/40 rounded-lg p-4">
+          <h3 className="text-sm font-semibold text-slate-200 mb-3 border-b border-slate-800 pb-2">
+            Validation Issues
+          </h3>
+          <div className="flex-1">
+            <ValidationPanel />
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
     <>
-      <div className="h-[70vh] w-full overflow-hidden rounded-lg border border-slate-800 bg-slate-950">
-        <ReactFlow
-          nodes={rfNodes}
-          edges={rfEdges}
-          nodeTypes={NODE_TYPES}
-          fitView
-          fitViewOptions={{ padding: 0.2, maxZoom: 1 }}
-          proOptions={{ hideAttribution: true }}
-          onNodesChange={handleNodesChange}
-          onNodeDragStop={handleNodeDragStop}
-          onNodeClick={handleNodeClick}
-          onConnect={handleConnect}
-          onNodesDelete={handleNodesDelete}
-          onEdgesDelete={handleEdgesDelete}
-          // Default is "Backspace" only — accept both so Mac users
-          // hitting Delete (Fn+Backspace) get the same behavior.
-          deleteKeyCode={["Backspace", "Delete"]}
-          nodesConnectable={true}
-          edgesFocusable={true}
-          elementsSelectable={true}
-          // Lower default min/max zoom than the lib's defaults; the
-          // tiles already truncate their summary at a reasonable
-          // size, so we don't need to zoom past 1.5x.
-          minZoom={0.2}
-          maxZoom={1.5}
-        >
-          <Background gap={24} size={1} color="#1e293b" />
-          <Controls
-            className="!border-slate-700 !bg-slate-900 [&_button]:!border-slate-700 [&_button]:!bg-slate-900 [&_button:hover]:!bg-slate-800"
-            showInteractive={false}
-          />
-          <MiniMap
-            pannable
-            zoomable
-            nodeColor="#334155"
-            maskColor="rgba(15, 23, 42, 0.7)"
-            className="!border !border-slate-700 !bg-slate-900"
-          />
-          <Panel position="bottom-right" className="!bottom-4 !right-4">
-            <CanvasAddNodeButton />
-          </Panel>
-        </ReactFlow>
+      <div className="flex w-full gap-6 h-[calc(100vh-220px)] min-h-[500px]">
+        {/* Canvas Area */}
+        <div className="flex-1 h-full overflow-hidden rounded-lg border border-slate-800 bg-slate-950 relative">
+          <ReactFlow
+            nodes={rfNodes}
+            edges={rfEdges}
+            nodeTypes={NODE_TYPES}
+            fitView
+            fitViewOptions={{ padding: 0.2, maxZoom: 1 }}
+            proOptions={{ hideAttribution: true }}
+            onNodesChange={handleNodesChange}
+            onNodeDragStop={handleNodeDragStop}
+            onNodeClick={handleNodeClick}
+            onConnect={handleConnect}
+            onNodesDelete={handleNodesDelete}
+            onEdgesDelete={handleEdgesDelete}
+            // Default is "Backspace" only — accept both so Mac users
+            // hitting Delete (Fn+Backspace) get the same behavior.
+            deleteKeyCode={["Backspace", "Delete"]}
+            nodesConnectable={true}
+            edgesFocusable={true}
+            elementsSelectable={true}
+            // Lower default min/max zoom than the lib's defaults; the
+            // tiles already truncate their summary at a reasonable
+            // size, so we don't need to zoom past 1.5x.
+            minZoom={0.2}
+            maxZoom={1.5}
+          >
+            <Background gap={24} size={1} color="#1e293b" />
+            <Controls
+              className="!border-slate-700 !bg-slate-900 [&_button]:!border-slate-700 [&_button]:!bg-slate-900 [&_button:hover]:!bg-slate-800"
+              showInteractive={false}
+            />
+            <MiniMap
+              pannable
+              zoomable
+              nodeColor="#334155"
+              maskColor="rgba(15, 23, 42, 0.7)"
+              className="!border !border-slate-700 !bg-slate-900"
+            />
+            <Panel position="bottom-right" className="!bottom-4 !right-4">
+              <CanvasAddNodeButton />
+            </Panel>
+          </ReactFlow>
+        </div>
+
+        {/* Validation Sidebar */}
+        <div className="w-80 h-full flex flex-col shrink-0 overflow-y-auto border border-slate-800 bg-slate-900/40 rounded-lg p-4">
+          <h3 className="text-sm font-semibold text-slate-200 mb-3 border-b border-slate-800 pb-2">
+            Validation Issues
+          </h3>
+          <div className="flex-1">
+            <ValidationPanel />
+          </div>
+        </div>
       </div>
 
       <NodeEditSheet

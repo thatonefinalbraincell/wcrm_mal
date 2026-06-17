@@ -86,11 +86,11 @@ describe("isAccountRole", () => {
 });
 
 describe("capability predicates", () => {
-  it("canManageMembers: admin+ only", () => {
-    expect(canManageMembers("owner")).toBe(true);
-    expect(canManageMembers("admin")).toBe(true);
-    expect(canManageMembers("agent")).toBe(false);
-    expect(canManageMembers("viewer")).toBe(false);
+  it("canManageMembers: owner only", () => {
+     expect(canManageMembers("owner")).toBe(true);
+     expect(canManageMembers("admin")).toBe(false);
+     expect(canManageMembers("agent")).toBe(false);
+     expect(canManageMembers("viewer")).toBe(false);
   });
 
   it("canEditSettings: admin+ only", () => {
