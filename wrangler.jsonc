@@ -9,14 +9,33 @@
   ],
   "vars": {
     "NEXT_PUBLIC_SITE_URL": "https://wcrm-mal.malavikavinodp.workers.dev",
-    "NEXT_PUBLIC_SUPABASE_URL": "<YOUR_SUPABASE_URL>",
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "<YOUR_SUPABASE_ANON_KEY>",
-    "SUPABASE_SERVICE_ROLE_KEY": "<YOUR_SERVICE_ROLE_KEY>"
+    "NEXT_PUBLIC_SUPABASE_URL": "https://rniswkgwdnswflrjrmun.supabase.co",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJuaXN3a2d3ZG5zd2ZscmpybXVuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMDE5NjYsImV4cCI6MjA5NjY3Nzk2Nn0.Ocsfm3e3u7qtOPacAoYw-pXFF5svYtEm_j4vE78NGUM",
+
+    "SUPABASE_SERVICE_ROLE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJuaXN3a2d3ZG5zd2ZscmpybXVuIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MTEwMTk2NiwiZXhwIjoyMDk2Njc3OTY2fQ.oA2wlVIDEmtW0zecovW_tCxKvVvp-qAV-wvL1OazkUU"
   },
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
+
+  
+  "observability": {
+    "enabled": false,
+    "head_sampling_rate": 1,
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "persist": true,
+      "invocation_logs": true
+    },
+    "traces": {
+      "enabled": false,
+      "persist": true,
+      "head_sampling_rate": 1
+    }
+  },
+
   "observability": {
     "enabled": false,
     "head_sampling_rate": 1,
